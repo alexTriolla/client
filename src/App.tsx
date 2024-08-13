@@ -1,24 +1,30 @@
-import { Box, List, ListItem, Typography } from '@mui/material';
-import { useGetAllEvents } from './features/api/getAllEvents';
-import { Event } from './types/Event';
+import { Box, Typography } from '@mui/material';
+import SideMenu from './features/events/components/SideMenu';
+import ListView from './features/events/components/ListView';
 
 function App() {
-  const { data: events, isLoading, error } = useGetAllEvents();
-
-  if (isLoading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography>An error occurred: {error.message}</Typography>;
-
   return (
-    <Box>
-      {events?.map((event: Event) => (
-        <List>
-          <ListItem>{event.title}</ListItem>
-          <ListItem>{event.description}</ListItem>
-          <ListItem>{event.location}</ListItem>
-          <ListItem>{new Date(event.createdAt).toLocaleDateString()}</ListItem>
-          <ListItem>{new Date(event.updatedAt).toLocaleDateString()}</ListItem>
-        </List>
-      ))}
+    <Box
+      display={'flex'}
+      sx={{
+        backgroundColor: '#F9F9F9',
+      }}
+    >
+      <SideMenu />
+      <Box
+        display={'flex'}
+        flexDirection={'column'}
+        gap={4}
+        p={4}
+        sx={{
+          width: '100%',
+        }}
+      >
+        <Typography variant="h4" color="#505050">
+          Dashboard
+        </Typography>
+        <ListView />
+      </Box>
     </Box>
   );
 }
