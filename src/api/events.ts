@@ -11,6 +11,13 @@ export const deleteEvent = async (id: number): Promise<string> => {
   return response.data;
 };
 
+export const createNewEvent = async (newEvent: Event): Promise<Event> => {
+  const response = await axios.post('api/events', {
+    event: newEvent,
+  });
+  return response.data;
+};
+
 export const editEvent = async (
   id: number,
   updatedEvent: Partial<Event>

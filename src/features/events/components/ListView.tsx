@@ -18,11 +18,13 @@ import { useGetAllEvents } from '../../../hooks/useGetAllEvents';
 import { useDeleteEvent } from '../../../hooks/useDeleteEvent';
 import { Event } from '../../../types/Event';
 import { useEditEvent } from '../../../hooks/useEditEvent';
+import { useCreateEvent } from '../../../hooks/useCreateEvent';
 
 const ListView = () => {
   const { data: events, isLoading, error } = useGetAllEvents();
   const deleteMutation = useDeleteEvent();
   const editMutation = useEditEvent();
+  const createMutation = useCreateEvent();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -47,11 +49,29 @@ const ListView = () => {
   };
 
   const handleSave = () => {
-    // Handle save action, perhaps using the editEvent hook
-    console.log('Save changes', selectedEvent);
-    if (!selectedEvent) return;
-    editMutation.mutate({ id: selectedEvent.id, updatedEvent: selectedEvent });
+    if (selectedEvent) {
+      if (selectedEvent.id) {
+        // Edit existing event
+        editMutation.mutate({
+          id: selectedEvent.id,
+          updatedEvent: selectedEvent,
+        });
+      } else {
+        // Create new event
+        createMutation.mutate(selectedEvent);
+      }
+    }
     handleDrawerClose();
+  };
+
+  const handleCreateNew = () => {
+    setSelectedEvent({
+      id: 0, // Temporary ID for the new event
+      title: '',
+      description: '',
+      location: '',
+    });
+    setIsDrawerOpen(true);
   };
 
   return (
@@ -67,7 +87,12 @@ const ListView = () => {
           border: '1px solid #F4F4F4',
         }}
       >
-        <Typography variant="h5">Events</Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h5">Events</Typography>
+          <Button variant="contained" color="primary" onClick={handleCreateNew}>
+            Create New
+          </Button>
+        </Box>
         <TableContainer>
           <Table
             sx={{
@@ -104,10 +129,14 @@ const ListView = () => {
                   <TableCell align="right">{row.description}</TableCell>
                   <TableCell align="right">{row.location}</TableCell>
                   <TableCell align="right">
-                    {new Date(row.createdAt).toLocaleDateString()}
+                    {row.createdAt
+                      ? new Date(row.createdAt).toLocaleDateString()
+                      : ''}
                   </TableCell>
                   <TableCell align="right">
-                    {new Date(row.updatedAt).toLocaleDateString()}
+                    {row.updatedAt
+                      ? new Date(row.updatedAt).toLocaleDateString()
+                      : ''}
                   </TableCell>
                   <TableCell align="right">
                     <IconButton color="primary" onClick={() => handleEdit(row)}>
@@ -127,14 +156,16 @@ const ListView = () => {
         </TableContainer>
       </Box>
 
-      {/* Drawer for editing an event */}
+      {/* Drawer for creating or editing an event */}
       <Drawer
         anchor="right"
         open={isDrawerOpen}
         onClose={handleDrawerClose}
         sx={{ '& .MuiDrawer-paper': { width: 300, padding: 2 } }}
       >
-        <Typography variant="h6">Edit Event</Typography>
+        <Typography variant="h6">
+          {selectedEvent?.id ? 'Edit Event' : 'Create New Event'}
+        </Typography>
         {selectedEvent && (
           <Box display="flex" flexDirection="column" gap={2} mt={2}>
             <TextField
@@ -162,7 +193,7 @@ const ListView = () => {
               }
             />
             <Button variant="contained" color="primary" onClick={handleSave}>
-              Save Changes
+              {selectedEvent.id ? 'Save Changes' : 'Create Event'}
             </Button>
           </Box>
         )}

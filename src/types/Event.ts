@@ -3,6 +3,6 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
